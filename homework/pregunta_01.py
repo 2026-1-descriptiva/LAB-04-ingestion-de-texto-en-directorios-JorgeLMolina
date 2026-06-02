@@ -5,6 +5,9 @@
 Escriba el codigo que ejecute la accion solicitada en cada pregunta.
 """
 
+import pandas as pd
+import os
+
 
 def pregunta_01():
     """
@@ -71,3 +74,35 @@ def pregunta_01():
 
 
     """
+
+    ruta_principal = "files/input"
+    salida = {}
+
+    with os.scandir(ruta_principal) as carpetas_padres:
+        for carpeta_padre in carpetas_padres:
+            if carpeta_padre.is_dir():
+                lineas=[]
+                contador = 0
+                with os.scandir(carpeta_padre.path) as carpetas_hijos:
+                    for carpeta_hijo in carpetas_hijos:
+                        if carpeta_hijo.is_dir():
+                            with os.scandir(carpeta_hijo.path) as archivos:
+                                for archivo in archivos:
+                                    if archivo.is_file():
+                                        with open(archivo.path, "r", encoding="utf-8") as f:
+                                            for line in f:
+                                                linea ={"id": contador, "phrase": line.strip(), "target": carpeta_hijo.name}
+                                                lineas.append(linea)
+                                                contador = contador + 1
+
+
+                salida[carpeta_padre.name]=lineas
+    
+    for carpeta in salida:
+        if not os.path.exists("files/output"):
+            os.makedirs("files/output")
+        df = pd.DataFrame(salida[carpeta])
+        df.to_csv(f"files/output/{carpeta}_dataset.csv", index=False)
+
+pregunta_01()
+    
